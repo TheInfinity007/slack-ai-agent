@@ -321,7 +321,10 @@ class SlackAIAgent {
             const responseText = result.content || result;
 
             // String markdown content
-            const cleanedResponse = responseText.replace(/```json\\n|\\n?```/g, '').trim();
+            const cleanedResponse = responseText.replace(/```[a-zA-Z]*\n?/g, '')
+                .replace(/```/g, '')
+                .replace(/\*\*/g, "*") // Replace ** to * so that bold appear in slack
+                .trim();
 
             const analysis = JSON.parse(cleanedResponse);
 
@@ -350,14 +353,14 @@ class SlackAIAgent {
         const blocks = [
             {
                 type: 'header',
-                text: { type: 'plain_text', text: `🔍 New Member: ${memberInfo.name} (${memberInfo.title})` }
+                text: { type: 'plain_text', text: `🔍 New Member: ${memberInfo.name}${memberInfo.title ? ` (${memberInfo.title})` : ''}` }
             },
             {
                 type: 'section',
                 fields: [
-                    { type: 'mrkdwn', text: `*Fit Score:*${analysis.fitScore}/100` },
-                    { type: 'mrkdwn', text: `*Email:*${memberInfo.email || 'Not Provided'}` },
-                    { type: 'mrkdwn', text: `*Title:*${memberInfo.title || 'Not Provided'}` },
+                    { type: 'mrkdwn', text: `*Fit Score:* ${analysis.fitScore}/100` },
+                    { type: 'mrkdwn', text: `*Email:* ${memberInfo.email || 'Not Provided'}` },
+                    { type: 'mrkdwn', text: `*Title:* ${memberInfo.title || 'Not Provided'}` },
                 ]
             }
         ]
@@ -366,9 +369,9 @@ class SlackAIAgent {
             blocks.push({
                 type: 'section',
                 text: {
-                    type: 'mrkdwn', text: `*Insights:*\\n${analysis.insights.map(i =>
+                    type: 'mrkdwn', text: `*Insights:*\n${analysis.insights.map(i =>
                         `• ${i}`
-                    ).join('\\n')}`
+                    ).join('\n')}`
                 }
             })
         }
@@ -377,9 +380,9 @@ class SlackAIAgent {
             blocks.push({
                 type: 'section',
                 text: {
-                    type: 'mrkdwn', text: `*Recommendations:*\\n${analysis.recommendations.map(r =>
+                    type: 'mrkdwn', text: `*Recommendations:*\n${analysis.recommendations.map(r =>
                         `• ${r}`
-                    ).join('\\n')}`
+                    ).join('\n')}`
                 }
             })
         }
@@ -397,7 +400,12 @@ class SlackAIAgent {
         await this.webClient.chat.postMessage({
             channel: process.env.SLACK_PRIVATE_CHANNEL_ID,
             text: `New Member Analysis: ${memberInfo.name} (${analysis.fitScore}/100)`,
-            blocks
+            attachments: [
+                {
+                    color,
+                    blocks
+                }
+            ]
         })
 
         log.info(`Analysis posted to slack channel for ${memberInfo.name}`);

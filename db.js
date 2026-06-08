@@ -77,7 +77,7 @@ export const saveMemberAnalysis = async (memberInfo, analysis, researchData) => 
             member_timezone,
             fit_score,
             insights,
-            recommendatoins,
+            recommendations,
             research_data
            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING id
