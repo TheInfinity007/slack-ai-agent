@@ -7,6 +7,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import axios from 'axios';
 
+import { initDatabase, closeDatabase, saveMemberAnalysis, markAsSentToSlack } from './db'
+
+
 // Read environment variables from .env file
 dotenv.config();
 
