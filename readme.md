@@ -1,4 +1,4 @@
-# Slack AI Agent
+# Slack AI Member Analysis Agent
 
 A lightweight Slack bot that automatically analyzes new team members and posts AI-generated hiring fit and engagement recommendations back to Slack.
 
@@ -25,11 +25,11 @@ https://youtu.be/MnG0ugK2JAI?t=2342
 
 ## Screenshot / Demo
 
-> Add your Slack UI screenshot or GIF here.
+A sample Slack analysis message and database reference are shown below.
 
 ![Slack member analysis screenshot](./assets/slack-analysis.png)
 
-> Add your database screenshot / ERD here.
+> Optional: add a database schema or ERD screenshot here for internal reference.
 
 ![Database schema screenshot](./assets/database-schema.png)
 
@@ -43,8 +43,7 @@ https://youtu.be/MnG0ugK2JAI?t=2342
 
 ### Prerequisites
 
-- Node.js 18+ installed
- - Node.js 24 installed
+- Node.js 24+ installed
 - PostgreSQL database accessible via a connection string
 - Slack app configured with bot token, app token, and signing secret
 - One of the supported LLM providers configured:
