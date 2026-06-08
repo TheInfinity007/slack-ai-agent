@@ -33,6 +33,10 @@ https://youtu.be/MnG0ugK2JAI?t=2342
 
 ![Database schema screenshot](./assets/database-schema.png)
 
+> Optional: a cropped row or table screenshot for quick-reference view.
+
+![Database row screenshot](./assets/database-row.png)
+
 ---
 
 ## Getting Started
