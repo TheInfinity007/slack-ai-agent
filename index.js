@@ -4,6 +4,7 @@ import { WebClient } from '@slack/web-api';
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatGroq } from "@langchain/groq";
 
 import OpenAI from 'openai';
 import express from 'express';
@@ -38,25 +39,36 @@ class SlackAIAgent {
         this.webClient = new WebClient(process.env.SLACK_BOT_TOKEN);
 
         // this.debugOpenAIModels()
-        this.llm = process.env.LLM_PROVIDER === "openai"
-            ?
-            // Initialize the LangChain OpenAI chat model gpt4, low temperature for consistent output 
-            new ChatOpenAI({
-                model: "gpt-4.1",
-                temperature: 0.3,
-                apiKey: process.env.OPENAI_API_KEY,
-            })
-            : new ChatGoogleGenerativeAI({
+        this.llm = this.getLlm();
+
+        // Register slack event listener
+        this.setupSlackEvent();
+        this.setupExpress();
+    }
+
+    getLlm() {
+        const provider = (process.env.LLM_PROVIDER || '').toLowerCase();
+        switch (provider) {
+            case "openai": // Initialize the LangChain OpenAI chat model gpt4, low temperature for consistent output 
+                return new ChatOpenAI({
+                    model: "gpt-4.1",
+                    temperature: 0.3,
+                    apiKey: process.env.OPENAI_API_KEY,
+                });
+            case "google": return new ChatGoogleGenerativeAI({
                 model: "gemini-2.5-flash",
                 temperature: 0.2,
                 maxOutputTokens: 4096,
                 apiKey: process.env.GOOGLE_API_KEY,
                 maxRetries: 2,
             });
-
-        // Register slack event listener
-        this.setupSlackEvent();
-        this.setupExpress();
+            case "groq": return new ChatGroq({
+                apiKey: process.env.GROQ_API_KEY,
+                model: "llama-3.3-70b-versatile",
+                temperature: 0.2,
+            });
+            default: throw new Error("Invalid LLM Provider")
+        }
     }
 
     async debugOpenAIModels() {
