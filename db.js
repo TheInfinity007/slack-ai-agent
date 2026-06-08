@@ -2,7 +2,6 @@ import pg from 'pg';
 
 const { Pool } = pg;
 import dotenv from 'dotenv';
-import { idleTimeoutMillis } from 'pg/lib/defaults';
 
 dotenv.config();
 

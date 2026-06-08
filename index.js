@@ -7,7 +7,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import axios from 'axios';
 
-import { initDatabase, closeDatabase, saveMemberAnalysis, markAsSentToSlack } from './db'
+import { initDatabase, closeDatabase, saveMemberAnalysis, markAsSentToSlack } from './db.js'
 
 
 // Read environment variables from .env file
@@ -157,14 +157,14 @@ class SlackAIAgent {
             log.info(`Saving analysis to database for member ${memberInfo.name}`);
 
             // 3. Save the analysis to the database and get the analysis ID
-            analysisId = await this.saveMemberAnalysis(memberInfo, analysis, researchData);
+            analysisId = await saveMemberAnalysis(memberInfo, analysis, researchData);
 
             // 4. Post the analysis to the appropriate slack channel
             await this.postAnalysisToChannel(memberInfo, analysis, researchData);
 
             // 5. Update the db recoreds to mark the analysis as sent to slack
             if (analysisId) {
-                await this.markAsSentToSlack(analysisId);
+                await markAsSentToSlack(analysisId);
             }
         } catch (error) {
             log.error(`Error processing member ${memberInfo.name}:`, error.message);
@@ -304,7 +304,7 @@ class SlackAIAgent {
 
         const color = analysis.fitScore >= 80 ? '#36a64f' :
             analysis.fitScore >= 60 ? '#ffb84d' :
-                analysis.fitScore >= 40 ? '#ff9500' : #ff4444;
+                analysis.fitScore >= 40 ? '#ff9500' : '#ff4444';
 
 
         const blocks = [
