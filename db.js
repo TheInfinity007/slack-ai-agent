@@ -46,6 +46,16 @@ export async function initDatabase() {
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             `)
+
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_member_id ON member_analyses(member_id);     
+        `)
+
+        await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_analyzed_at ON member_analyses(analyzed_at);     
+        `)
+
+        console.log('[INFO] Database schema initialized');
     } catch (err) {
         console.error('[ERROR] Failed to initialize databaes:', err.message);
         throw error;
