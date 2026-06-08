@@ -3,6 +3,9 @@ import { App } from '@slack/bolt';
 import { WebClient } from '@slack/web-api';
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+
+import OpenAI from 'openai';
 import express from 'express';
 import dotenv from 'dotenv';
 import axios from 'axios';
@@ -34,16 +37,53 @@ class SlackAIAgent {
         // Standalone Slack web client for direct API calls outside of Bolt's event system
         this.webClient = new WebClient(process.env.SLACK_BOT_TOKEN);
 
-        // Initialize the LangChain OpenAI chat model gpt4, low temperature for consistent output
-        this.openai = new ChatOpenAI({
-            model: "gpt-4",
-            temperature: 0.3,
-            apiKey: process.env.OPENAI_API_KEY,
-        })
+        // this.debugOpenAIModels()
+        this.llm = process.env.LLM_PROVIDER === "openai"
+            ?
+            // Initialize the LangChain OpenAI chat model gpt4, low temperature for consistent output 
+            new ChatOpenAI({
+                model: "gpt-4.1",
+                temperature: 0.3,
+                apiKey: process.env.OPENAI_API_KEY,
+            })
+            : new ChatGoogleGenerativeAI({
+                model: "gemini-2.5-flash",
+                temperature: 0.2,
+                maxOutputTokens: 4096,
+                apiKey: process.env.GOOGLE_API_KEY,
+                maxRetries: 2,
+            });
 
         // Register slack event listener
         this.setupSlackEvent();
         this.setupExpress();
+    }
+
+    async debugOpenAIModels() {
+        const client = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+
+        const models = await client.models.list();
+
+        for (const model of models.data) {
+            console.log(model.id);
+        }
+
+        try {
+
+            console.log("TEsting gpt")
+            const response = await client.responses.create({
+                model: "gpt-4.1-mini",
+                input: "Hello",
+            });
+            console.log("Got repponse")
+
+            console.log(response.output_text);
+        } catch (err) {
+            console.log("HI")
+            console.error(err);
+        }
     }
 
     setupSlackEvent() {
@@ -269,7 +309,7 @@ class SlackAIAgent {
                 researchData.map(r => `${r.title}: ${r.content}`).join(`\\n`)
                 : 'limited research data available';
 
-            const chain = prompt.pipe(this.openai);
+            const chain = prompt.pipe(this.llm);
 
             const result = await chain.invoke({
                 name: memberInfo.name,
