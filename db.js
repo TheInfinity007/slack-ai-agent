@@ -63,3 +63,74 @@ export async function initDatabase() {
         client.release();
     }
 }
+
+export const saveMemberAnalysis = async (memberInfo, analysis, researchData) => {
+    const client = await pool.connect();
+
+    try {
+        const result = await client.query(
+           `
+           INSERT INTO member_analyses (
+            member_id,
+            member_name,
+            member_email,
+            member_title,
+            member_timezone,
+            fit_score,
+            insights,
+            recommendatoins,
+            research_data
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            RETURNING id
+           `,
+           [
+            memberInfo.id || null,
+            memberInfo.name,
+            memberInfo.email || null,
+            memberInfo.title || null,
+            memberInfo.timezone || null,
+            analysis.fitScore,
+            JSON.stringify(analysis.insights),
+            JSON.stringify(analysis.recommendations),
+            JSON.stringify(researchData)
+           ]
+        );
+
+        console.log(`[INFO] Saved analysis to database with ID: ${result.rows[0].id}`);
+
+        return result.rows[0].id;
+    } catch (err) {
+        console.error('[ERROR] Failed to save analysis to database:', err.message);
+        throw error;
+    } finally {
+       client.release(); 
+    }
+}
+
+export const markAsSentToSlack = async (analysisId) => {
+    const client = await pool.connect();
+
+    try {
+        await client.query(
+            `
+            UPDATE member_analyses
+            SET sent_to_slack = TRUE,
+            sent_to_slack_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+            WHERE id = $1
+            `,
+            [analysisId]
+        );
+    } catch (err) {
+        console.error('[ERROR] Failed to mark as sent to Slack:', err.message);
+    } finally {
+        client.release();
+    }
+}
+
+export const closeDatabase = async () => {
+    await pool.end();
+    console.log('[INFO] Database connection pool closed');
+}
+
+export default pool;
