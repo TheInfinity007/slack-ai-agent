@@ -229,7 +229,7 @@ class SlackAIAgent {
                     url: user.html_url,
                     title: `GitHub: ${user.login}`,
                     // content: userResponse.data.bio || `GitHub profile for ${name}`,
-                    content: `${user.public_repos} public repositories`,
+                    content: `${user.repos_url} public repositories`,
                     type: 'github',
                 };
             }
@@ -242,7 +242,7 @@ class SlackAIAgent {
     }
 
     async analyseWithAI(memberInfo, researchData) {
-        const promopt = ChatPromptTemplate.fromTemplate(
+        const prompt = ChatPromptTemplate.fromTemplate(
             `Analyse this new community member for fit with our commercial product.
             
             Company: ${process.env.COMPANY_NAME || 'Your Company'}
