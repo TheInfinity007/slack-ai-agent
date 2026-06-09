@@ -29,11 +29,7 @@ A sample Slack analysis message and database reference are shown below.
 
 ![Slack member analysis screenshot](./assets/slack-analysis.png)
 
-> Optional: add a database schema or ERD screenshot here for internal reference.
-
 ![Database schema screenshot](./assets/database-schema.png)
-
-> Optional: a cropped row or table screenshot for quick-reference view.
 
 ![Database row screenshot](./assets/database-row.png)
 
